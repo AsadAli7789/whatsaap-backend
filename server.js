@@ -9,7 +9,7 @@ const { SocketAuth } = require("./middleware/socketMiddleware");
 const { updateUser, socketInit } = require("./socket");
 var corsOptions = {
   origin: process.env.FORNTEND_URL,
-  optionsSuccessStatus: 200,
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
 app.use(express.json());
@@ -22,5 +22,5 @@ app.get("/", function (req, res) {
   res.send("Hello ali");
 });
 
-httpServer.listen(3002);
+httpServer.listen(3001);
 socketInit(httpServer);

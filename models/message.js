@@ -23,11 +23,6 @@ module.exports = (sequelize, DataTypes) => {
           as: "chatId",
         },
       },
-      type: {
-        allowNull: true,
-        type: DataTypes.STRING,
-        defaultValue: "text",
-      },
       message: DataTypes.STRING,
       personId: DataTypes.INTEGER,
     },

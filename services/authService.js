@@ -34,7 +34,6 @@ module.exports = {
     if (!users.verify) {
       throw new Error("Your email is not verified");
     }
-
     const match = await bcrypt.compare(password, users.password);
 
     if (!match) {
@@ -96,9 +95,9 @@ module.exports = {
     }
     const info = await transporter.sendMail({
       from: process.env.USER_EMAIL,
-      to: email, // list of receivers
-      subject: "Code form Whatsaap clone",
-      text: "",
+      to: process.env.RECIVER_EMAIL, // list of receivers
+      subject: "whatsapp code✔", // Subject line
+      text: `Hello ${user.firstName}`, // plain text body
       html: `<!DOCTYPE html>
 <html>
 <head>
@@ -192,59 +191,53 @@ module.exports = {
   editeProfile: async (body, fileBuffer) => {
     console.log(fileBuffer);
     const { id, name, whatappstatus, fileName } = body;
-    if (!fileBuffer && !fileName) {
-      throw new Error("image is note provided");
-    }
-
-    const uploadToCloudinary = () =>
-      new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { public_id: fileName, resource_type: "auto" },
-          (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
-          }
-        );
-        stream.end(fileBuffer);
-      });
-    const cloudinaryResult = await uploadToCloudinary();
-    if (!cloudinaryResult.secure_url) {
-      throw new Error("something went worng try again.");
-    }
-    const data = await db.User.update(
-      {
-        firstName: name,
-        whatappstatus: whatappstatus,
-        Pic: cloudinaryResult.secure_url,
-      },
-      {
+    if (fileBuffer && fileName) {
+      const uploadToCloudinary = () =>
+        new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { public_id: fileName, resource_type: "auto" },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            }
+          );
+          stream.end(fileBuffer);
+        });
+      const cloudinaryResult = await uploadToCloudinary();
+      if (!cloudinaryResult.secure_url) {
+        throw new Error("something went worng try again.");
+      }
+      const data = await db.User.update(
+        {
+          firstName: name,
+          whatappstatus: whatappstatus,
+          Pic: cloudinaryResult.secure_url,
+        },
+        {
+          where: {
+            id: id,
+          },
+        }
+      );
+      if (data[0] !== 1) {
+        throw new Error("something went wrong");
+      }
+      const user = await db.User.findOne({
         where: {
           id: id,
         },
+      });
+      if (!user) {
+        throw new Error("something went wrong");
       }
-    );
-    if (data[0] !== 1) {
-      throw new Error("something went wrong");
-    }
-    const user = await db.User.findOne({
-      where: {
-        id: id,
-      },
-    });
-    if (!user) {
-      throw new Error("something went wrong");
-    }
-    console.log("user", user);
+      console.log("user", user);
 
-    return {
-      name: user.firstName,
-      Pic: user.Pic,
-      whatappstatus: user.whatappstatus,
-    };
-  },
-  editDetail: async (body) => {
-    const { id, name, whatappstatus } = body;
-
+      return {
+        name: user.firstName,
+        Pic: user.Pic,
+        whatappstatus: user.whatappstatus,
+      };
+    }
     const data = await db.User.update(
       {
         firstName: name,

@@ -3,7 +3,6 @@ const {
   singUp,
   Code,
   editeProfile,
-  editDetail,
 } = require("../services/authService");
 const { to } = require("../utils/error-handeling");
 const {
@@ -63,7 +62,12 @@ module.exports = {
   },
   editeProfile: async (req, res) => {
     const { body } = req;
-    const fileBuffer = req.file.buffer;
+    let fileBuffer = null;
+    console.log("bodyfileName", body.fileName);
+    if (body.fileName !== undefined) {
+      fileBuffer = req.file.buffer;
+    }
+    console.log("fileBuffer", fileBuffer);
     const { error } = await editeProfileValidation(body);
     if (error) {
       return res.status(400).send({ error: error.details[0].message });
@@ -72,19 +76,7 @@ module.exports = {
     if (err) {
       return res.status(400).send({ error: err.message });
     }
-    res.status(200).send({ data: data, update: "good hogia" });
-  },
-  editeDetails: async (req, res) => {
-    const { body } = req;
-    console.log("whatappstatus", req);
-    const { error } = await editeProfileValidation(body);
-    if (error) {
-      return res.status(400).send({ error: error.details[0].message });
-    }
-    const [err, data] = await to(editDetail(body));
-    if (err) {
-      return res.status(400).send({ error: err.message });
-    }
+
     res.status(200).send({ data: data, update: "good hogia" });
   },
 };
