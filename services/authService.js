@@ -31,7 +31,9 @@ module.exports = {
     if (!users) {
       throw new Error("Your email or password is wrong.");
     }
-
+    if (!users.verify) {
+      throw new Error("Your email is not verified");
+    }
     const match = await bcrypt.compare(password, users.password);
 
     if (!match) {
@@ -96,10 +98,61 @@ module.exports = {
     }
     const info = await transporter.sendMail({
       from: process.env.USER_EMAIL,
-      to: process.env.RECIVER_EMAIL, // list of receivers
+      to: email, // list of receivers
       subject: "Hello ✔", // Subject line
       text: "Hello world?", // plain text body
-      html: `<b>code ${code} </b>`, // html body
+      html: `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .code {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px dashed #007bff;
+            display: inline-block;
+            letter-spacing: 2px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Your Verification Code</h2>
+        <p>Use the following code to verify your email:</p>
+        <div class="code">${code}</div>
+        <p>If you didn’t request this code, please ignore this email.</p>
+        <div class="footer">
+            <p>Thank you! <br> WhatsApp Clone Team</p>
+        </div>
+    </div>
+</body>
+</html>
+`, // html body
     });
     return data;
   },
